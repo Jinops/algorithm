@@ -11,25 +11,21 @@ for i in range(0,n):
 
 def spreadVirus(lab): # bfs
     q = deque([])
-    visited = [[False]* m for _ in range(n)]
     for x in range(n):
         for y in range(m):
             if lab[x][y] == 2:
                 q.append((x,y))
-                visited[x][y] = True
-
+    
     while q:
         currentX, currentY = q[0]
         for move in moveXY:
             x, y = currentX + move[0], currentY + move[1]
 
-            if not (x >= 0 and x < n and y >=0 and y < m and not visited[x][y]):
+            if not (x >= 0 and x < n and y >=0 and y < m):
                 continue
             if lab[x][y] == 0:
                 lab[x][y] = 2
                 q.append((x,y))
-                visited[x][y] = True
-
         q.popleft()
 
 def getVirusedLab() :
@@ -61,4 +57,3 @@ def generateLabAndRun(moreWallCount):
 
 generateLabAndRun(0)
 print(safeCount)
-
