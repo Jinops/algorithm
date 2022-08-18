@@ -1,9 +1,11 @@
+from collections import deque
+
 n,m,k,x = map(int, input().split())
 m_line = {}
 answers = []
 
 def bfs(start, end):
-    q = [start]
+    q = deque([start])
     visited = [False] * (n+1)
     visited[start] = True
     distance = 0
@@ -17,7 +19,7 @@ def bfs(start, end):
                     visited[node] = True
                     if node == end :
                         return distance
-        q.pop(0)
+        q.popleft()
     return distance
 
 for i in range(0, m):

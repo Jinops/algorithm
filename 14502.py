@@ -1,4 +1,5 @@
 import copy
+from collections import deque
 
 moveXY = [(1,0), (-1,0), (0,1), (0,-1)]
 n,m = map(int, input().split())
@@ -9,7 +10,7 @@ for i in range(0,n):
     lab.append(list(map(int, input().split())))
 
 def spreadVirus(lab): # bfs
-    q = []
+    q = deque([])
     for x in range(n):
         for y in range(m):
             if lab[x][y] == 2:
@@ -25,7 +26,7 @@ def spreadVirus(lab): # bfs
             if lab[x][y] == 0:
                 lab[x][y] = 2
                 q.append((x,y))
-        q.pop(0)
+        q.popleft()
 
 def getVirusedLab() :
     virusedLab = copy.deepcopy(lab)
