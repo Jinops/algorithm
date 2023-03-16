@@ -1,16 +1,13 @@
-# TODO
-# a = input()
-# b = input()
-a = "acaca"  
-b = "accca"
+a = input()
+b = input()
 
-cache = [[0]*(len(b)+1)]*(len(a)+1)
+dp = [[0]*(len(b)+1) for _ in range(len(a)+1)]
+
 for aIdx in range(len(a)):
     for bIdx in range(len(b)):
         if a[aIdx] == b[bIdx] :
-            cache[aIdx+1][bIdx+1] = cache[aIdx][bIdx] + 1
+            dp[aIdx+1][bIdx+1] = dp[aIdx][bIdx] + 1
         else :
-            cache[aIdx+1][bIdx+1] = max(cache[aIdx+1][bIdx], cache[aIdx][bIdx+1])
+            dp[aIdx+1][bIdx+1] = max(dp[aIdx+1][bIdx], dp[aIdx][bIdx+1])
 
-print(cache[len(a)][len(b)])
-
+print(dp[len(a)][len(b)])
