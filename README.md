@@ -1,2 +1,2 @@
 # algorithm
-Algorithm study for coding test
+Practice algorithm problems for coding test
