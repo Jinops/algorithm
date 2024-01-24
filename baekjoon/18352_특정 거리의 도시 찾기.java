@@ -43,10 +43,14 @@ public class Main {
 		
 		while(queue.size()>0) { // BFS
 			int startNode = queue.poll();
+			if(costs[startNode]>k) {
+				break;
+			}
 			ArrayList<Integer> adjNodes = edges.get(startNode);
 			if(adjNodes!=null) {
 				for(int node:adjNodes) {
 					if(!visited.contains(node)) {
+						visited.add(node);
 						queue.add(node);
 						costs[node] = Math.min(costs[node], costs[startNode]+1);
 					}
