@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.StringTokenizer;
@@ -19,6 +20,7 @@ public class Main {
 		int x = Integer.parseInt(st.nextToken());
 		
 		Map<Integer, ArrayList<Integer>> edges = new HashMap<>();
+		List<Integer> visited = new ArrayList<>();
 		int[] costs = new int[n+1];
 		for(int i=0; i<costs.length; i++) {
 			costs[i] =Integer.MAX_VALUE;
@@ -39,50 +41,25 @@ public class Main {
 		Queue<Integer> queue = new LinkedList<>();
 		queue.add(x);
 		
-		while(queue.size() < n) {
-			int node = getNearestNode(queue, edges, n); // 주변 연결안된 노드들을 뽑아서
-			costs[node] = Math.min(costs[node], 2 + getMinCost(queue, costs, x));
-			queue.add(node); // 연결을 시킨다
-			System.out.println(node);
-//			for(int adjNode:edges.get(node)) { // 연결된 노드 주면 노드에 대해
-//				System.out.printf("ADJ %d\n", adjNode);
-//				if(!queue.contains(adjNode) && ) { // queue에 없는 노드이고, 
-//					costs[adjNode] = Math.min(costs[adjNode], 2); // cost를 계산해주다
-//				}
-//				System.out.printf("costs[%d] %d\n", adjNode, costs[adjNode]);
-//			}
-		}
-		
-		System.out.println(edges);
-		
-		for(int c:costs) {
-			System.out.printf("%d ",c);
-		}
-	}
-	
-	static int getNearestNode(Queue<Integer> queue, Map<Integer, ArrayList<Integer>> edges, int n) {
-		for(int start:edges.keySet()) {
-			for(int end:edges.get(start)) {
-				if(queue.contains(start) && !queue.contains(end)) {
-					return end;
+		while(queue.size()>0) { // BFS
+			int startNode = queue.poll();
+			ArrayList<Integer> adjNodes = edges.get(startNode);
+			if(adjNodes!=null) {
+				for(int node:adjNodes) {
+					if(!visited.contains(node)) {
+						queue.add(node);
+						costs[node] = Math.min(costs[node], costs[startNode]+1);
+					}
 				}
 			}
 		}
-		return -1;
-	}
-	static int getMinCost(Queue<Integer> queue, int[] costs, int start) {
-		int min = Integer.MAX_VALUE;
-		if(queue.size()==1) {
-			return 0;
-		}
-		for(int node:queue) {
-			if(node==start) {
-				continue;
-			}
-			if(costs[node] < min) {
-				min = costs[node];
+		
+		String result = "";
+		for(int i=1; i<costs.length; i++) {
+			if(costs[i]==k) {
+				result += i+"\n";
 			}
 		}
-		return min;
+		System.out.print((result.equals("")?-1:result));
 	}
 }
