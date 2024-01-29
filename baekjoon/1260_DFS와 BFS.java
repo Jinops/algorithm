@@ -36,20 +36,20 @@ public class Main {
     }
   }
   
-  static LinkedList<Integer> bfs() {
+  static LinkedList<Integer> bfs(HashMap<Integer,Boolean> visited) {
     Queue<Integer> queue = new LinkedList<>();
     LinkedList<Integer> route = new LinkedList<>();
-    boolean[] visited = new boolean[n+1];
     queue.add(v);
     route.add(v);
-    visited[v] = true;
+    visited.put(v, true);
     
     while(!queue.isEmpty()) {
       int start = queue.poll();
       if(edges.get(start)!=null) {
         for(int node:edges.get(start)) {
-          if(!visited[node]) {
-            visited[node] = true;
+          System.out.println(node);
+          if(!visited.get(node)) { // TODO: node not in visited
+            visited.put(node, true);
             queue.add(node);
             route.add(node);
           }
@@ -58,9 +58,9 @@ public class Main {
     }
     
     if(route.size() < n) {
-      for(int i=1; i<=n; i++) {
-        if(!route.contains(i)) {
-          route.add(i);
+      for(int node:visited.keySet()) {
+        if(!visited.get(node)) {
+          route.add(node);
         }
       }
     }
@@ -75,6 +75,8 @@ public class Main {
     n = Integer.parseInt(st.nextToken());
     m = Integer.parseInt(st.nextToken());
     v = Integer.parseInt(st.nextToken());
+
+    HashMap<Integer, Boolean> visited = new HashMap<>();
     
     for(int i=0; i<m; i++) {
       st = new StringTokenizer(br.readLine());
@@ -87,10 +89,11 @@ public class Main {
     }
     for(int key:edges.keySet()) {
       edges.get(key).sort(null);
+      visited.put(key, false);
     }
     
     dfs(v, new boolean[n+1], new LinkedList<>());
     System.err.println("---");
-    printRoute(bfs());
+    printRoute(bfs(new HashMap<>(visited)));
   }
 }
