@@ -1,36 +1,33 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
+import java.util.Stack;
 import java.util.StringTokenizer;
 
 public class Main {
   static int N;
   static int[] arr;
-  static int bestResult;
-  static LinkedList<Integer> bestResutList;
+  static int result;
+  static Stack<Integer> resultStack;
   
-  static int calculate(LinkedList<Integer> list) {
-    int result = list.get(0) * list.get(N-1);
-    for(int i=0; i<N-1; i++) {
-      result += list.get(i) * list.get(i+1);
-    }
-    return result;
-  }
-  
-  static void run(LinkedList<Integer> list) {
-    if(list.size() == N) {
-      int result = calculate(list);
-      if(result > bestResult) {
-        bestResult = result;
-        bestResutList = (LinkedList<Integer>) list.clone();
+  static void run(Stack<Integer> stack, int acc) {
+    if(stack.size() == N) {
+      acc += stack.lastElement() * stack.firstElement();
+      if(acc > result) {
+        result = acc;
+        resultStack = (Stack<Integer>) stack.clone();
       }
+      return;
     }
     for(int n:arr) {
-      if(!list.contains(n)) {
-        list.add(n);
-        run(list);
-        list.pop();
+      if(!stack.contains(n)) {
+        int newAcc = acc;
+        if(stack.size()>0) {
+          newAcc += stack.lastElement() * n;
+        }
+        stack.add(n);
+        run(stack, newAcc);
+        stack.pop();
       }
     }
   }
@@ -46,7 +43,8 @@ public class Main {
       arr[i] = Integer.parseInt(st.nextToken());
     }
     
-    run(new LinkedList<Integer>());
-    System.out.println(bestResult);System.out.println(bestResutList.toString().replace("[", "").replace("]", "").replaceAll(",", ""));
+    run(new Stack<Integer>(), 0);
+    System.out.println(result);
+    System.out.println(resultStack.toString().replace("[", "").replace("]", "").replaceAll(",", ""));
   }
 }
