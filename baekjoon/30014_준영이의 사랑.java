@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
@@ -8,7 +9,7 @@ public class Main {
   static int N;
   static int[] arr;
   static int bestResult;
-  static Stack<Integer> bestStack;
+  static LinkedList<Integer> bestStack;
   
   static int calculate(Stack<Integer> stack) {
     int result = stack.lastElement() * stack.firstElement();
@@ -18,19 +19,17 @@ public class Main {
     return result;
   }
   
-  static void run(Stack<Integer> stack) {
-    if(stack.size() == N) {
-      int result = calculate(stack);
-      if(result > bestResult) {
-        bestResult = result;
-        bestStack = (Stack<Integer>) stack.clone();
-      }
+  static void run(int multiplied, LinkedList<Integer> list) {
+    if(list.size() == N && multiplied > bestResult) {
+//      System.out.println(list.toString());
+      bestResult = multiplied;
+      bestStack = list;
     }
     for(int n:arr) {
-      if(stack.search(n)==-1) {
-        stack.add(n);
-        run(stack);
-        stack.pop();
+      if(!list.contains(n)) {
+        list.add(n);
+        run(multiplied*n, list);
+        list.pop();
       }
     }
   }
@@ -45,11 +44,11 @@ public class Main {
     for(int i=0; i<N; i++) {
       arr[i] = Integer.parseInt(st.nextToken());
     }
-    
-    Stack<Integer> stack = new Stack<>();
-    run(stack);
-    
+    long beforeTime = System.currentTimeMillis();
+    run(1, new LinkedList<Integer>());
     System.out.println(bestResult);
     System.out.println(bestStack.toString().replace("[", "").replace("]", "").replaceAll(",", ""));
+
+    System.out.println("시간차이(m) : "+( System.currentTimeMillis() - beforeTime));
   }
 }
