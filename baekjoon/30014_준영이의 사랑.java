@@ -1,50 +1,44 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class Main {
-  static int N;
-  static int[] arr;
-  static int result;
-  static Stack<Integer> resultStack;
-  
-  static void run(Stack<Integer> stack, int acc) {
-    if(stack.size() == N) {
-      acc += stack.lastElement() * stack.firstElement();
-      if(acc > result) {
-        result = acc;
-        resultStack = (Stack<Integer>) stack.clone();
-      }
-      return;
-    }
-    for(int n:arr) {
-      if(!stack.contains(n)) {
-        int newAcc = acc;
-        if(stack.size()>0) {
-          newAcc += stack.lastElement() * n;
-        }
-        stack.add(n);
-        run(stack, newAcc);
-        stack.pop();
-      }
-    }
-  }
-  
   public static void main(String[] args) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     
-    N = Integer.parseInt(br.readLine());
-    arr = new int[N];
+    int N = Integer.parseInt(br.readLine());
+    int[] arr = new int[N];
     
     StringTokenizer st = new StringTokenizer(br.readLine());
     for(int i=0; i<N; i++) {
       arr[i] = Integer.parseInt(st.nextToken());
     }
+    Arrays.sort(arr);
     
-    run(new Stack<Integer>(), 0);
+    Deque<Integer> queue = new LinkedList<>();
+    boolean addLast = true;
+    for(int i=N-1; i>=0; i--) {
+      if(addLast) {
+        queue.addLast(arr[i]);
+      } else {
+        queue.addFirst(arr[i]);
+      }
+      addLast = !addLast;
+    }
+    
+    List<Integer> list = new ArrayList<>(queue);
+    int result = list.get(list.size()-1) * list.get(0);
+    for(int i=0; i<list.size()-1; i++) {
+      result += list.get(i) * list.get(i+1);
+    }
+    
     System.out.println(result);
-    System.out.println(resultStack.toString().replace("[", "").replace("]", "").replaceAll(",", ""));
+    System.out.println(queue.toString().replace("[", "").replace("]", "").replaceAll(",", ""));
   }
 }
