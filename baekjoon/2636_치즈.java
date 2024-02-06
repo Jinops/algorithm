@@ -1,92 +1,85 @@
-// 2636 TODO
 import java.util.*;
+import java.awt.Point;
 import java.io.*;
 
 public class Main {
-  static int H;
-  static int W;
+  static int Y;
+  static int X;
   
   static int[][] deltas = {{1,0},{-1,0},{0,1},{0,-1}};
   
-  public static int xyIdx(int x, int y) {
-    return H*y+x;
-  }
-  
-  static int idxX(int idx) {
-    return idx/H;
-  }
-  
-  static int idxY(int idx) {
-    return idx%H;
+  static Point[] getNearPoints(Point p, boolean[][] visited) {
+    ArrayList<Point> points = new ArrayList<>();
+    for(int[] delta:deltas) {
+      int newX = p.x+delta[0];
+      int newY = p.y+delta[1];
+      if(0<=newX&&newX<X && 0<=newY&&newY<Y && !visited[newY][newX]) {
+        points.add(new Point(newX, newY));
+      }
+    }
+    return points.toArray(new Point[points.size()]);
   }
 
   public static void main(String[] args) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     StringTokenizer st = new StringTokenizer(br.readLine());
     
-    H = Integer.parseInt(st.nextToken());
-    W = Integer.parseInt(st.nextToken());
-    int[][] map = new int[H][W];
+    Y = Integer.parseInt(st.nextToken());
+    X = Integer.parseInt(st.nextToken());
+    int[][] map = new int[Y][X];
     
-    for(int i=0; i<H; i++) {
+    for(int i=0; i<Y; i++) {
       st = new StringTokenizer(br.readLine());
-      for(int j=0; j<W; j++) {
+      for(int j=0; j<X; j++) {
         map[i][j] = Integer.parseInt(st.nextToken());
       }
     }
     
-    int time = 0;
-    int cheeseCnt = 1;
+    int curCheeseCnt = 1; // 임시값
+    int meltingCheeseCnt = 0;
+    int cnt = 0;
+    Point startP = new Point(0, 0);
     
-    while(cheeseCnt>0) {
-      cheeseCnt = 0;
-      boolean[] visited = new boolean[H*W];
-      for(int i=0; i<H; i++) {
-        for(int j=0; j<W; j++) {
-          if(map[i][j]==0) {
-            Queue<Integer> queue = new LinkedList<>();
-            queue.add(xyIdx(j, i));
-            while(!queue.isEmpty()) {
-              int xy = queue.poll();
-              if(visited[xy]) {
-                continue;
-              }
-              visited[xy] = true;
-              for(int[] delta:deltas) {
-                int nX = idxX(xy)+delta[0];
-                int nY = idxY(xy)+delta[1];
-                int nXyIdx = xyIdx(nX, nY);
-                if(0<=nX && nX<W && 0<=nY && nY <H && !visited[nXyIdx]) {
-                  if(map[nY][nX]==0) {
-                    visited[xy] = true;
-                    queue.add(nXyIdx);
-                  } else if(map[nY][nX]==1){ // 치즈일 경우
-                    visited[xy] = true;
-                    map[nY][nX] = 2;
-                    cheeseCnt += 1;
-                  }
-                }
-              }
-            }
+    while(curCheeseCnt>0) {
+      Queue<Point> queue = new LinkedList<>();
+      boolean[][] visited = new boolean[Y][X];
+      queue.add(startP);
+      visited[0][0] = true;
+      
+      while(!queue.isEmpty()) {
+        Point fromP = queue.poll();
+              
+        for(Point p:getNearPoints(fromP, visited)) { // queue에 넣기 전에 visited 체크
+//          System.out.println(fromP.y+","+fromP.x+"->"+p.y+","+p.x);
+          if(map[p.y][p.x]==0) {
+            queue.add(p);
+            visited[p.y][p.x] = true;
+          } else if (map[p.y][p.x]==1) {
+            map[p.y][p.x] = 2;
           }
         }
-      }
-      for(int[] a:map) {
-        System.out.println(Arrays.toString(a));
       }
       
-      for (int i=0; i<H; i++) {
-        for(int j=0; j<W; j++) {
-          if(map[i][j]==2){
+      curCheeseCnt = 0;
+      meltingCheeseCnt = 0;
+      
+      for(int i=0; i<Y; i++) {
+        for(int j=0; j<X; j++) {
+          if(map[i][j]==1) {
+            curCheeseCnt += 1;
+          } else if(map[i][j]==2) {
             map[i][j] = 0;
-            cheeseCnt -= 1;
+            meltingCheeseCnt += 1;
           }
         }
       }
-      time+=1;
+      
+      if(curCheeseCnt!=0 || meltingCheeseCnt !=0) { // 애초에 치즈 없는 경우 제외
+        cnt += 1;
+      }
     }
-    
-    System.out.println(time);
-    System.out.println(cheeseCnt);
+  
+    System.out.println(cnt);
+    System.out.print(meltingCheeseCnt);
   }
 }
