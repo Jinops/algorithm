@@ -5,12 +5,11 @@ import java.util.*;
 
 public class Main {
   static int P;
-  static int[] nodes;
   static HashMap<Integer, HashMap<Integer, Integer>> edges = new HashMap<>();
   
   static int getNearestNode(Set<Integer> set, int[] distances) {
     int nearestNode = 0;
-    for(int node:nodes) {
+    for(int node:edges.keySet()) {
       if(!set.contains(node) && distances[node] < distances[nearestNode]) {
         nearestNode = node;
       }
@@ -49,14 +48,12 @@ public class Main {
     
     int C = Integer.parseInt(st.nextToken());
     P = Integer.parseInt(st.nextToken());
-    nodes = new int[P+1];
     int PB = Integer.parseInt(st.nextToken());
     int PA1 = Integer.parseInt(st.nextToken());
     int PA2 = Integer.parseInt(st.nextToken());
     
     for(int p=1; p<=P; p++) {
       edges.put(p, new HashMap<>());
-      nodes[p] = p;
     }
     
     for(int i=0; i<C; i++) {
