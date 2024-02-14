@@ -2,26 +2,26 @@ import java.io.*;
 import java.util.*;
  
 class Node {
-  int number;
+  int data;
   Node parent;
   Node left;
   Node right;
    
   Node(){}
   Node(int number){
-    this.number = number;
+    this.data = number;
   }
 }
  
 public class Solution {
   static int count(Node n) {
     if(n==null) {
-      return 1;
+      return 0;
     }
-    int cnt = 0;
+    int cnt = 1;
     cnt += count(n.left);
     cnt += count(n.right);
-     
+    
     return cnt;
   }
    
@@ -66,7 +66,7 @@ public class Solution {
         n2 = n2.parent;
       }
        
-      System.out.printf("#%d %d %d\n", t, n2.number, count(n2)-1);
+      System.out.printf("#%d %d %d\n", t, n2.data, count(n2));
     }
   }
 }
