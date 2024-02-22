@@ -21,15 +21,15 @@ public class Solution {
         total += nums[i];
       }
 
-      boolean[] hasResults = new boolean[total + 1];
-      hasResults[0] = true;
+      boolean[] isPossibles = new boolean[total + 1];
+      isPossibles[0] = true;
       for (int num:nums) {
         for (int i=total; i>=num; i--) {
-          hasResults[i] = hasResults[i] || hasResults[i-num];
+          isPossibles[i] = isPossibles[i] || isPossibles[i-num];
         }
       }
-      for (boolean hasResult:hasResults) {
-        if (hasResult) result++;
+      for (boolean isPossible:isPossibles) {
+        if (isPossible) result++;
       }
 
       System.out.printf("#%d %d\n", t, result);
