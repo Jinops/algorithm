@@ -54,3 +54,16 @@ public class Main {
     System.out.println(toString(subnet));
   }
 }
+/* input
+2
+194.85.160.130
+194.85.161.133
+*/
+/* output
+194.85.160.0
+255.255.254.0
+*/
+/* my
+194.85.160.128
+255.255.254.0
+*/
