@@ -26,7 +26,7 @@ public class Main {
     boolean isSubnet = true;
     
     for(int i=0; i<4; i++) {
-      network[i] = (1<<8)-1;
+      network[i] = 0;
       subnet[i] = 0;
       for(int[] ip:ips) {
         network[i] = network[i] & ip[i];
@@ -38,7 +38,7 @@ public class Main {
       for(int j=7; j>=0; j--) {
         int bit=1<<j;
         for(int[] ip:ips) {
-          if((network[i]&bit) != (ip[i]&bit)) {
+          if((ips[0][i]&bit) != (ip[i]&bit)) {
             isSubnet = false;
             break;
           }
@@ -48,22 +48,9 @@ public class Main {
         }
         subnet[i] |= bit;
       }
-      
+      network[i] = ips[0][i] & subnet[i];
     }
     System.out.println(toString(network));
     System.out.println(toString(subnet));
   }
 }
-/* input
-2
-194.85.160.130
-194.85.161.133
-*/
-/* output
-194.85.160.0
-255.255.254.0
-*/
-/* my
-194.85.160.128
-255.255.254.0
-*/
