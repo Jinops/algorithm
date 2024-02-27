@@ -1,4 +1,3 @@
-// TODO: 87% fail
 import java.io.*;
 
 public class Main {
