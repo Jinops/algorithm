@@ -9,10 +9,9 @@ public class Main {
   
   static Point cp;
   static int size = 2;
+  static int moveCnt;
   
   static int[][] matrix;
-  static HashMap<Integer, Integer> fishCnt = new HashMap<>();
-  
 
   static int[][] deltas = {{0,-1}, {-1,0}, {0,1}, {1,0}};
   
@@ -37,68 +36,70 @@ public class Main {
     return false;
   }
   
-  static void eat(Point p) {
-    int fishSize = matrix[p.y][p.x];
-    matrix[p.y][p.x] = 0;
-    fishCnt.put(fishSize, fishCnt.get(fishSize)-1);
-    size++;
+  static int[][] getMoveMatrix(Point p){
+    int[][] moves = new int[N][N];
+    for(int i=0; i<N; i++) {
+      for(int j=0; j<N; j++) {
+        moves[i][j] = -1;
+      }
+    }
+    moves[p.y][p.x] = 0;
+    
+    return moves;
   }
   
-  static int[][] getNewDepth(Point p, int pDepth) {
-    int[][] depth = new int[N][N];
-    depth[p.y][p.x] = pDepth;
-    return depth;
-  }
-  
-  private static int move() { // BFS
+  private static Point getNextPoint() { // BFS
     Queue<Point> queue = new LinkedList<>();
     queue.add(cp);
-    int[][] depth = getNewDepth(cp, 1);
-    while(true) {
+    int[][] moves = getMoveMatrix(cp);
+    moveCnt = N*N-1; // 움직일 최대 횟수
+    List<Point> newPs = new LinkedList<>();
+    while(!queue.isEmpty()) {
       Point p = queue.poll();
       if(isEatable(p)) {
-        eat(p);
-        depth = getNewDepth(p, 1);
+        newPs.add(p);
+        moveCnt = moves[p.y][p.x];
+        continue;
       }
-      for(int[]a:matrix) {
-        System.out.println(Arrays.toString(a));
-      }
-      System.out.println();
-      if(!isValid()) {
-        return depth[p.y][p.x];
+      if(moves[p.y][p.x]>=moveCnt) {
+        continue;
       }
       for(int[] delta:deltas) {
         Point np = new Point(p.x+delta[0], p.y+delta[1]);
-        if(inRange(np) && depth[np.y][np.x]==0 && isMovable(np)) {
+        if(inRange(np) && moves[np.y][np.x]==-1 && isMovable(np)) {
+          // 방문안했고, 지금 크기에서 갈 수 있는 곳만 방문
           queue.add(np);
-          depth[np.y][np.x] += depth[p.y][p.x]; 
+          moves[np.y][np.x] = moves[p.y][p.x]+1; 
         }
       }
-      if(queue.isEmpty()) {
-        return depth[p.y][p.x];
+    }
+    
+    for(int i=0; i<N; i++) {
+      System.out.print(Arrays.toString(matrix[i]) + " | ");
+      System.out.println(Arrays.toString(moves[i]));
+    }
+    
+    if(newPs.size()==0) {
+      return cp;
+    } else {
+      Point p = newPs.get(0);
+      for(Point newP:newPs) {
+        if(newP.y<p.y) {
+          p = newP;
+        } else if(newP.y == p.y && newP.x < newP.x) {
+          p = newP;
+        }
       }
+      return p;
     }
   }
 
-  private static boolean isValid() {
-    for(int fishSize=1; fishSize<Math.min(size, 6); fishSize++) {
-      if(fishCnt.get(fishSize)>0) {
-        return true;
-      }
-    }
-    return false;
-  }
-  
   public static void main(String[] args) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
     StringTokenizer st;
     
     N = Integer.parseInt(br.readLine());
     matrix = new int[N][N];
-    
-    for(int size=1; size<=6; size++) {
-      fishCnt.put(size, 0);
-    }
     
     for(int i=0; i<N; i++) {
       st = new StringTokenizer(br.readLine());
@@ -107,15 +108,31 @@ public class Main {
         if(matrix[i][j]==9) {
           cp = new Point(j, i);
           matrix[i][j] = 0;
-        } else if(matrix[i][j]>0) {
-          fishCnt.put(matrix[i][j], fishCnt.get(matrix[i][j])+1);
         }
       }
     }
     
+    int result = 0;
+    int fishCnt = 0;
+    while(true) {
+      System.out.println(cp.toString() + " Tmove:"+ result + " size:"+size);
+      Point np = getNextPoint();
+      System.out.println(np.toString() +" Cmove:"+moveCnt);
+      if(cp==np) {
+        break;
+      } else {
+        cp = np;
+        matrix[cp.y][cp.x] = 0;
+        fishCnt++;
+        
+        if(fishCnt==size) {
+          fishCnt = 0;
+          size++;
+        }
+        result += moveCnt;
+      }
+    }
     
-    System.out.println(move());
-    
+    System.out.println(result);
   }
-
 }
