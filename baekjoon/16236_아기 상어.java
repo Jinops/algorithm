@@ -65,7 +65,7 @@ public class Main {
       for(int[] delta:deltas) {
         Point np = new Point(p.x+delta[0], p.y+delta[1]);
         if(inRange(np) && isMovable(np) && moves[np.y][np.x]==-1) {
-          // idx 범위 && 움직일 수 있는 곳 && 방문 안한 곳 && 최대횟수 초과 전
+          // idx 범위 && 움직일 수 있는 곳 && 방문 안한 곳
           queue.add(np);
           moves[np.y][np.x] = moves[p.y][p.x]+1; 
         }
