@@ -1,4 +1,3 @@
-// TODO
 import java.io.*;
 
 public class Main {
@@ -22,15 +21,33 @@ public class Main {
         ips[i][j] = Integer.parseInt(ipsStr[j]);
       }
     }
+    
+    boolean isSubnet = true;
+    
     for(int i=0; i<4; i++) {
-      network[i] = 255; // (1<<8)-1
-      subnet[i] = 255;
+      network[i] = 0;
+      subnet[i] = 0;
       for(int[] ip:ips) {
         network[i] = network[i] & ip[i];
       }
-      for(int[] ip:ips) {
-        subnet[i] = subnet[i] & (network[i] ^ ip[i] ^ 255);
+      
+      if(!isSubnet) {
+        continue;
       }
+      for(int j=7; j>=0; j--) {
+        int bit=1<<j;
+        for(int[] ip:ips) {
+          if((ips[0][i]&bit) != (ip[i]&bit)) {
+            isSubnet = false;
+            break;
+          }
+        }
+        if(!isSubnet) {
+          break;
+        }
+        subnet[i] |= bit;
+      }
+      network[i] = ips[0][i] & subnet[i];
     }
     System.out.println(toString(network));
     System.out.println(toString(subnet));
