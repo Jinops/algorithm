@@ -1,5 +1,3 @@
-// TODO
-
 import java.awt.Point;
 import java.io.*;
 import java.util.*;
@@ -56,42 +54,40 @@ public class Main {
     List<Point> newPs = new LinkedList<>();
     while(!queue.isEmpty()) {
       Point p = queue.poll();
+      if(moves[p.y][p.x]>moveCnt) {
+        continue;
+      }
       if(isEatable(p)) {
         newPs.add(p);
         moveCnt = moves[p.y][p.x];
         continue;
       }
-      if(moves[p.y][p.x]>=moveCnt) {
-        continue;
-      }
       for(int[] delta:deltas) {
         Point np = new Point(p.x+delta[0], p.y+delta[1]);
-        if(inRange(np) && moves[np.y][np.x]==-1 && isMovable(np)) {
-          // 방문안했고, 지금 크기에서 갈 수 있는 곳만 방문
+        if(inRange(np) && isMovable(np) && moves[np.y][np.x]==-1) {
+          // idx 범위 && 움직일 수 있는 곳 && 방문 안한 곳
           queue.add(np);
           moves[np.y][np.x] = moves[p.y][p.x]+1; 
         }
       }
     }
     
-    for(int i=0; i<N; i++) {
-      System.out.print(Arrays.toString(matrix[i]) + " | ");
-      System.out.println(Arrays.toString(moves[i]));
-    }
-    
     if(newPs.size()==0) {
       return cp;
-    } else {
-      Point p = newPs.get(0);
-      for(Point newP:newPs) {
-        if(newP.y<p.y) {
-          p = newP;
-        } else if(newP.y == p.y && newP.x < newP.x) {
-          p = newP;
-        }
-      }
-      return p;
     }
+    if(newPs.size()==1) {
+      return newPs.get(0);
+    }
+    Point np = newPs.get(0);
+    for(Point newP:newPs) {
+      if(newP.y<np.y) {
+        np = newP;
+      } else if(newP.y == np.y && newP.x < newP.x) {
+        np = newP;
+      }
+    }
+    return np;
+    
   }
 
   public static void main(String[] args) throws IOException {
@@ -115,9 +111,7 @@ public class Main {
     int result = 0;
     int fishCnt = 0;
     while(true) {
-      System.out.println(cp.toString() + " Tmove:"+ result + " size:"+size);
       Point np = getNextPoint();
-      System.out.println(np.toString() +" Cmove:"+moveCnt);
       if(cp==np) {
         break;
       } else {
