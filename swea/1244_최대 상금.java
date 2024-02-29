@@ -1,21 +1,50 @@
-// TODO:
 import java.io.*;
 import java.util.*;
 
 public class Solution {
-  static int[] getOrderedIdxArray(Integer[] nums) {
-    ArrayList<Integer> originList = new ArrayList<>(Arrays.asList(nums));
-    ArrayList<Integer> list = new ArrayList<>(Arrays.asList(nums));
-    list.sort(Collections.reverseOrder());
-    int[] idxArr = new int[list.size()];
-    System.out.println(originList.toString());
-    System.out.println(list.toString());
-    for(int i=0; i<idxArr.length; i++) {
-      System.out.println(list.get(i));
-      idxArr[i] = originList.indexOf(list.get(i));
-      list.set(i, -1);
+  static int remainCnt;
+  
+  static int getDescendingCount(int[] arr, int idx) {
+    int cnt = 1;
+    int i = idx;
+    while(i<arr.length-2 && arr[i]>arr[++i]) {
+      cnt++;
     }
-    return idxArr;
+    return cnt;
+  }
+  
+  static int getContinuousCount(int[] arr, int idx) {
+    int cnt = 1;
+    int i = idx;
+    while(i>0 && arr[--i]==arr[idx]) {
+      cnt++;
+    }
+    return cnt;
+  }
+  
+  static void swap(int[] arr, int a, int b) {
+    int temp = arr[a];
+    arr[a] = arr[b];
+    arr[b] = temp;
+    remainCnt--;
+  }
+  
+  static int getMaxIdx(int[] arr, int start) {
+    int maxIdx = start;
+    for(int i=start+1; i<arr.length; i++) {
+      if(arr[i]>=arr[maxIdx]) { // last idx
+        maxIdx = i;
+      }
+    }
+    return maxIdx;
+  }
+  
+  static String toString(int[] arr) {
+    StringBuilder sb = new StringBuilder();
+    for(int n:arr) {
+      sb.append(n);
+    }
+    return sb.toString();
   }
   
   public static void main(String[] args) throws IOException {
@@ -27,16 +56,51 @@ public class Solution {
 
       st = new StringTokenizer(br.readLine());
       String str = st.nextToken();
-      Integer[] nums = new Integer[str.length()];
-      int cnt = Integer.parseInt(st.nextToken());
+      int[] arr = new int[str.length()];
+      remainCnt = Integer.parseInt(st.nextToken());
       
-      for(int i=0; i<nums.length; i++) {
-        nums[i] = Character.getNumericValue(str.charAt(i));
+      for(int i=0; i<arr.length; i++) {
+        arr[i] = Character.getNumericValue(str.charAt(i));
       }
-      int[] idxArr = getOrderedIdxArray(nums);
-      System.out.println(Arrays.toString(idxArr));
-//      
-//      System.out.printf("#%d %s\n", t, isPal?"YES":"NO");
+      
+      int baseIdx = 0;
+      int continuous = 0;
+
+      
+      if(arr.length == 2) {
+        if(remainCnt%2==1) {
+          swap(arr, baseIdx, baseIdx+1);
+        }
+        remainCnt = 0;
+      }
+      
+      while(remainCnt>0) {
+        if(baseIdx == arr.length-2) {
+          int targetIdx = arr[baseIdx-1]<=arr[baseIdx] ? baseIdx-1 : baseIdx+1;
+          swap(arr, baseIdx, targetIdx);
+          continue;
+        }
+        int targetIdx = getMaxIdx(arr, baseIdx+1);
+        if(arr[baseIdx]>=arr[targetIdx]) {
+          baseIdx++;
+          continue;
+        }
+        
+        continuous = getContinuousCount(arr, targetIdx);
+        if(continuous > 1  && arr[baseIdx]>arr[baseIdx+1]) {
+          int desc = getDescendingCount(arr, baseIdx);
+          int swapCnt = Math.min(remainCnt, Math.min(desc, continuous));
+          for(int i=0; i<swapCnt; i++) {
+            swap(arr, baseIdx+i, targetIdx-swapCnt+1+i);
+          }
+          baseIdx += swapCnt;
+          continue;
+        } 
+        
+        swap(arr, baseIdx, targetIdx);
+      }
+      
+      System.out.printf("#%d %s\n", t, toString(arr));
     }
   }
 }
