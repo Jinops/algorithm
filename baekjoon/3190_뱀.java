@@ -40,28 +40,10 @@ class Main {
   static boolean isSnake(Deque<Point> snake, Point head) {
     for(Point p:snake) {
       if(p!=head && p.x==head.x && p.y==head.y) {
-        System.out.println("FAIL AT"+head.toString());
         return true;
       }
     }
     return false;
-  }
-  
-  static void _print(Deque<Point> snake){
-    int[][] _matrix = new int[N][N];
-    for(int i=0; i<N; i++) {
-      for(int j=0; j<N; j++) {
-        _matrix[i][j] = matrix[i][j];
-      }
-    }
-    for(Point p:snake) {
-        _matrix[p.y][p.x]= 2; 
-    }
-    
-    for(int[] m:_matrix) {
-      System.out.println(Arrays.toString(m));
-    }
-    System.out.println();
   }
   
   public static void main(String[] args) throws IOException {
@@ -96,29 +78,27 @@ class Main {
     int idx = 0;
     int time = 0;
     
-    while(inRange(snake.peekLast()) && !isSnake(snake, snake.peekLast())) {
-      System.out.println(time +"초 시작");
-      _print(snake);
-      
-      time++;
-      if(idx<L && time > times[idx]) {
-        dIdx = getNextDeltaIdx(idx, dirs[idx]);
-        System.out.println("TURN " + dirs[idx] + " "+Arrays.toString(deltas[dIdx]));
+    while(true) {
+      if(idx<L && time >= times[idx]) {
+        dIdx = getNextDeltaIdx(dIdx, dirs[idx]);
         idx++;
       }
       Point head = snake.peekLast();
+      Point nextHead = getNextHead(head, dIdx);
+
+      time++;
+
+      if(!(inRange(nextHead) && !isSnake(snake, nextHead))) {
+        break;
+      }
+
       if(matrix[head.y][head.x]==APPLE) {
         matrix[head.y][head.x]=EMPTY;
       } else {
         snake.pollFirst();
       }
       
-      Point nextHead = getNextHead(head, dIdx);
-//      if(isSnake(snake, nextHead)) {
-//        break;
-//      }
       snake.add(nextHead);
-      System.out.println("NEXT: " + snake.peekLast());
     }
     
     System.out.println(time);
