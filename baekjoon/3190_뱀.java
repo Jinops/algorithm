@@ -1,7 +1,6 @@
-// WIP
 import java.util.*;
-import java.awt.Point;
 import java.io.*;
+import java.awt.Point;
 
 class Main {
   final static int EMPTY = 0;
