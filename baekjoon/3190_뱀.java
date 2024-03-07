@@ -9,16 +9,23 @@ class Main {
   final static int SNAKE = 2;
   
   static int N;
+  static int[][] matrix;
   
   public static int[][] deltas = {{1,0},{0,1},{-1,0},{0,-1}}; // 3,9,6,12
   
   public static int getNextDeltaIdx(int idx, char dir) {
     if(dir=='L') {
       idx = (idx==0)? 3 : idx-1;
-    }else if(dir=='R') {
+    }else if(dir=='D') {
       idx = (idx==3)? 0 : idx+1;
     }
     return idx;
+  }
+  
+  public static Point getNextHead(Point head, int dIdx) {
+    int dx = deltas[dIdx][0];
+    int dy = deltas[dIdx][1];
+    return new Point(head.x+dx, head.y+dy);
   }
   
   static void move(Point p, int x, int y) {
@@ -27,7 +34,34 @@ class Main {
   }
   
   static boolean inRange(Point p) {
-    return 0<=p.x&&p.y<N && 0<=p.y&&p.y<N;
+    return 0<=p.x&&p.x<N && 0<=p.y&&p.y<N;
+  }
+  
+  static boolean isSnake(Deque<Point> snake, Point head) {
+    for(Point p:snake) {
+      if(p!=head && p.x==head.x && p.y==head.y) {
+        System.out.println("FAIL AT"+head.toString());
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  static void _print(Deque<Point> snake){
+    int[][] _matrix = new int[N][N];
+    for(int i=0; i<N; i++) {
+      for(int j=0; j<N; j++) {
+        _matrix[i][j] = matrix[i][j];
+      }
+    }
+    for(Point p:snake) {
+        _matrix[p.y][p.x]= 2; 
+    }
+    
+    for(int[] m:_matrix) {
+      System.out.println(Arrays.toString(m));
+    }
+    System.out.println();
   }
   
   public static void main(String[] args) throws IOException {
@@ -36,7 +70,7 @@ class Main {
     
     N = Integer.parseInt(br.readLine());
     int K = Integer.parseInt(br.readLine());
-    int[][] matrix = new int[N][N];
+    matrix = new int[N][N];
     
     for(int i=0; i<K; i++) {
       st = new StringTokenizer(br.readLine());
@@ -55,35 +89,36 @@ class Main {
       dirs[i] = st.nextToken().charAt(0);
     }
     
-    Point h = new Point(0, 0); // head
-    Point t = new Point(0, 0); // tail
+    Deque<Point> snake = new LinkedList<>();
+    snake.add(new Point(0, 0));
     int dIdx = 0;
     
     int idx = 0;
     int time = 0;
     
-    while(inRange(h) && matrix[h.y][h.x]!= SNAKE) {
-//      if(idx<L && time >= times[idx]) {
-//        dIdx = getNextDeltaIdx(idx, dirs[idx]);
-//      }
-      
-      int dx = deltas[dIdx][0];
-      int dy = deltas[dIdx][1];
-      
-      if(matrix[h.y][h.x]==APPLE) {
-        matrix[h.y][h.x]= SNAKE;
-        move(h, dx, dy);
-      }
-      matrix[h.y][h.x] = SNAKE;
-      move(h, dx, dy);
-      
-      matrix[t.y][t.x] = EMPTY;
-      move(t, dx, dy);
+    while(inRange(snake.peekLast()) && !isSnake(snake, snake.peekLast())) {
+      System.out.println(time +"초 시작");
+      _print(snake);
       
       time++;
+      if(idx<L && time > times[idx]) {
+        dIdx = getNextDeltaIdx(idx, dirs[idx]);
+        System.out.println("TURN " + dirs[idx] + " "+Arrays.toString(deltas[dIdx]));
+        idx++;
+      }
+      Point head = snake.peekLast();
+      if(matrix[head.y][head.x]==APPLE) {
+        matrix[head.y][head.x]=EMPTY;
+      } else {
+        snake.pollFirst();
+      }
       
-      for(int[] a:matrix) System.out.println(Arrays.toString(a));
-      System.out.println();
+      Point nextHead = getNextHead(head, dIdx);
+//      if(isSnake(snake, nextHead)) {
+//        break;
+//      }
+      snake.add(nextHead);
+      System.out.println("NEXT: " + snake.peekLast());
     }
     
     System.out.println(time);
