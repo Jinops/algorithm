@@ -41,7 +41,7 @@ class Fish {
     this.isAlive = true;
   }
   
-  public  void replace(Fish fish) {
+  public void replace(Fish fish) {
     this.y = fish.y;
     this.x = fish.x;
     this.dir = fish.dir;
@@ -75,7 +75,7 @@ class Fish {
 }
 
 public class Main {
-  static int maxEatSum;
+  static int maxEatSum = 0;
   
   static boolean inRange(int x, int y) {
     return 0<=x&&x<4 && 0<=y&&y<4;
@@ -132,7 +132,6 @@ public class Main {
   }
   
   static Fish[][] getMatrix(Fish[] fishes, Shark shark){
-    
     Fish[][] matrix = new Fish[4][4];
     for(Fish fish:fishes) {
       matrix[fish.y][fish.x] = fish;
@@ -163,10 +162,12 @@ public class Main {
       return;
     }
     
-    for(Fish fish:eatableFishes) {
-      shark.eat(fish);
+    for(Fish eatablefish:eatableFishes) {
+      shark.eat(eatablefish);
+      
       fishMove(fishes, shark, matrix);
       run(fishes, shark);
+      
       for(int i=0; i<16; i++) {
         fishes[i].replace(beforeFishes[i]);
       }
@@ -194,9 +195,8 @@ public class Main {
     
     Shark shark = new Shark();
     shark.eat(matrix[0][0]);
-    maxEatSum = shark.eatSum;
-    fishMove(fishes, shark, matrix);
     
+    fishMove(fishes, shark, matrix);
     run(fishes, shark);
     
     System.out.println(maxEatSum);
