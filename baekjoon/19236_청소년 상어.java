@@ -1,4 +1,4 @@
-// WIP
+// TODO: TC pass / 4% 실패
 import java.util.*;
 import java.io.*;
 
@@ -9,16 +9,15 @@ class Shark extends Fish {
     eatSum = 0;
   }
   
-  public Shark(Shark shark) {
-    super(shark);
-    eatSum = shark.eatSum;
+  public void replace(Shark shark) {
+    super.replace(shark);
+    this.eatSum = shark.eatSum;
   }
 
   void eat(Fish fish) {
     fish.isAlive = false;
     this.move(fish.y, fish.x);
     this.dir = fish.dir;
-    System.out.print("> eat("+ this.eatSum + ")" + fish.y +","+fish.x+"("+fish.num+")");
     eatSum += fish.num;
   }
   
@@ -48,15 +47,15 @@ class Fish {
     this.x = x;
     this.dir = dir;
     this.num = num;
-    isAlive = true;
+    this.isAlive = true;
   }
   
-  public Fish(Fish fish) {
+  public  void replace(Fish fish) {
     this.y = fish.y;
     this.x = fish.x;
     this.dir = fish.dir;
     this.num = fish.num;
-    isAlive = fish.isAlive;
+    this.isAlive = fish.isAlive;
     
   }
   
@@ -82,16 +81,10 @@ class Fish {
   public int nextY(int move) {
     return y + deltas[dir][1]*move;
   }
-
-  @Override
-  public String toString() {
-    return "[" + y + "," + x + ", (" + num + "), " + isAlive + "]";
-  }
-  
 }
 
 public class Main {
-  static int maxEatSum = 0;
+  static int maxEatSum;
   
   static boolean inRange(int x, int y) {
     return 0<=x&&x<4 && 0<=y&&y<4;
@@ -102,20 +95,30 @@ public class Main {
       if(!fish.isAlive) {
         continue;
       }
-      
-      // inRange를 만족하고, shark가 아닐 때 break -> (inRange && !shark)
-      while(!(inRange(fish.nextX(), fish.nextY()) && matrix[fish.nextY()][fish.nextX()] != shark)) {
-        fish.rotate();
-      }
-      
+      int originDir = fish.dir;
+      boolean isValid = true;
       int ny = fish.nextY();
       int nx = fish.nextX();
+      // inRange를 만족하고, shark가 아닐 때 break -> (inRange && !shark)
+      while(isValid && !(inRange(nx, ny) && !(ny==shark.y && nx==shark.x))) {
+        fish.rotate();
+        if(fish.dir == originDir) {
+          isValid = false;
+          break;
+        }
+        ny = fish.nextY();
+        nx = fish.nextX();
+      }
+      
+      if(!isValid) {
+        continue;
+      }
       
       Fish targetFish = matrix[ny][nx];
-      matrix[fish.y][fish.x] = targetFish; 
       targetFish.move(fish.y, fish.x);
-      matrix[ny][nx] = fish;
+      matrix[fish.y][fish.x] = targetFish; 
       fish.move(ny, nx);
+      matrix[ny][nx] = fish;
     }
   }
   
@@ -127,7 +130,6 @@ public class Main {
     
     while(inRange(nx, ny)) {
       if(matrix[ny][nx].isAlive) {
-        System.out.print("(" + ny +","+nx + ")");
         eatables.add(matrix[ny][nx]);
       }
       move++;
@@ -144,7 +146,7 @@ public class Main {
     for(Fish fish:fishes) {
       matrix[fish.y][fish.x] = fish;
     }
-    matrix[shark.y][shark.x] = shark;
+    
     return matrix;
   }
   
@@ -152,50 +154,41 @@ public class Main {
     Fish[] fishes = new Fish[16];
     
     for(int i=0; i<16; i++) {
-      fishes[i] = new Fish(originFishes[i]);
+      fishes[i] = new Fish();
+      fishes[i].replace(originFishes[i]);
     }
     return fishes;
   }
-  
+
   static void run(Fish[] beforeFishes, Shark beforeShark) {
-    System.out.println("\n[run " + beforeShark.y +","+beforeShark.x+",("+beforeShark.eatSum+")]");
     Fish[] fishes = copyFishes(beforeFishes);
-    Shark shark = new Shark(beforeShark);
+    Shark shark = new Shark();
+    shark.replace(beforeShark);
     Fish[][] matrix = getMatrix(fishes, shark);
     
-    for(int i=0; i<4; i++) {
-      for(int j=0; j<4; j++) {
-        System.out.printf("%3d,",matrix[i][j].num);
-      }
-      System.out.println();
-    }
-    
-    
-    fishMove(fishes, shark, matrix);
-    System.out.print("[SharkMove ");
     List<Fish> eatableFishes = getEatableFishes(matrix, shark);
-    System.out.print("]");
     if(eatableFishes.size()==0) {
-      System.out.println(" > FINISH " + shark.eatSum+">"+maxEatSum+"\n");
       maxEatSum = Math.max(maxEatSum, shark.eatSum);
       return;
     }
     
     for(Fish fish:eatableFishes) {
       shark.eat(fish);
+      fishMove(fishes, shark, matrix);
       run(fishes, shark);
-      fishes = beforeFishes;
+      for(int i=0; i<16; i++) {
+        fishes[i].replace(beforeFishes[i]);
+      }
       shark = beforeShark;
+      matrix = getMatrix(fishes, shark);
     }
   }
   
   public static void main(String[] args) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-    
-    Fish[] _fishes = new Fish[16];
-    Fish[][] _matrix = new Fish[4][4];
-    Stack<Fish[]> stack = new Stack<>();
+    Fish[] fishes = new Fish[16];
+    Fish[][] matrix = new Fish[4][4];
     
     for(int i=0; i<4; i++) {
       StringTokenizer st = new StringTokenizer(br.readLine());
@@ -203,21 +196,18 @@ public class Main {
         int num = Integer.parseInt(st.nextToken());
         int dir = Integer.parseInt(st.nextToken());
         Fish fish = new Fish(i, j, dir, num);
-        _fishes[num-1] = fish;
-        _matrix[i][j] = fish;
+        fishes[num-1] = fish;
+        matrix[i][j] = fish;
       }
     }
     
-    Shark _shark = new Shark();
-
-    _shark.eat(_matrix[0][0]);
-    stack.add(_fishes);
-    System.out.println();
+    Shark shark = new Shark();
+    shark.eat(matrix[0][0]);
+    maxEatSum = 1;
+    fishMove(fishes, shark, matrix);
     
-    run(_fishes, _shark);
-    
+    run(fishes, shark);
     
     System.out.println(maxEatSum);
   }
-  
 }
