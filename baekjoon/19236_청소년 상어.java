@@ -20,14 +20,6 @@ class Shark extends Fish {
     this.dir = fish.dir;
     eatSum += fish.num;
   }
-  
-  void undoEat(Fish fish, int originY, int originX, int originDir) {
-    fish.isAlive = true;
-    eatSum -= fish.num;
-    this.y = originY;
-    this.x = originX;
-    this.dir = originDir;
-  }
 }
 
 class Fish {
@@ -36,7 +28,6 @@ class Fish {
   int dir;
   int num;
   boolean isAlive;
-  Fish beforeState;
   
   private final static int[][] deltas = {null, {0,-1},{-1,-1},{-1,0},{-1,1},{0,1},{1,1},{1,0},{1,-1}}; // 12시부터 반시계
 
@@ -203,7 +194,7 @@ public class Main {
     
     Shark shark = new Shark();
     shark.eat(matrix[0][0]);
-    maxEatSum = 1;
+    maxEatSum = shark.eatSum;
     fishMove(fishes, shark, matrix);
     
     run(fishes, shark);
