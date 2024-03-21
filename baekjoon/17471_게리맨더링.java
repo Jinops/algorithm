@@ -1,68 +1,92 @@
-// TODO https://www.acmicpc.net/problem/17471
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.io.*;
 
-public class Main {
-	
-	static int[] getAdjNodes(int node, int adjCounts, boolean[][] matrix) {
-		int[] adjNodes = new int[adjCounts];
-		int count = 0;
-		for(int i=0; i<matrix[node].length; i++) {
-			if(matrix[node][i]==true) {
-				adjNodes[count++] = i;
-			}
-		}
-		return adjNodes;
-	}
-	
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		int n = Integer.parseInt(br.readLine());
-		int[] costs = new int[n];
-		int[] adjCounts = new int[n];
-		boolean[][] matrix = new boolean[n][n];
-		
-		// BFS로 서치하면서
-		// 우선순위를 "h가 개선되는 것"을 우선으로
-		// h는 전체 cost - 현재 구역의 cost 
-		
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		for(int i=0; i<n; i++) {
-			costs[i] = Integer.parseInt(st.nextToken());
-		}
-		
-		for(int i=0; i<n; i++) {
-			st = new StringTokenizer(br.readLine());
-			adjCounts[i] = Integer.parseInt(st.nextToken());
-			
-			for(int start=0; start<adjCounts[i]; start++) {
-				int j = Integer.parseInt(st.nextToken())-1;
-				matrix[i][j] = true;
-				matrix[j][i] = true;
-			}
-		}
-		
-//		for(boolean[] m:matrix) {
-//			System.out.println(Arrays.toString(m));
-//		}
-		
-		for(int node=0; node<n; node++) {
-			// TODO
-			ArrayDeque<Integer> queue = new ArrayDeque<>();
-			queue.add(node);
-			
-			while(queue.size() < n) {
-				// 1. 현재 queue의 인접 node를 찾는다
-				// 2. 인접 node를 붙여도, 조건에 위배되지 않는지 확인한다.
-				// 3. 인접 node를 붙였을 때, 결과 h가 개선되는지 확인한다.
-				// 4. 
-			}
-			
-		}
-		
-	}
+class Main {
+  static int N;
+  static int[] populations;
+  static Map<Integer, Set<Integer>> map;
+  static int min = Integer.MAX_VALUE;
+
+  static void combination(int start, int n, int r, List<Integer> listA){ // nCr
+    if(r==0){
+      Set<Integer> setB = new HashSet<>(map.keySet());
+      setB.removeAll(listA);
+      List<Integer> listB = new LinkedList<>(setB);
+
+      if(isValid(listA) && isValid(listB)){
+        int pA = getPopulation(listA);
+        int pB = getPopulation(listB);
+        min = Math.min(min, Math.abs(pA-pB));
+      }
+      return;
+    }
+    for (int i=start; i<=n; i++){
+      listA.add(i);
+      combination(start+1, n, r-1, listA);
+      listA.remove(listA.size()-1);
+    }
+  }
+
+  static boolean isValid(List<Integer> list){
+    Queue<Integer> queue = new LinkedList<>();
+    boolean[] visited = new boolean[N+1];
+
+    queue.add(list.get(0));
+    visited[list.get(0)] = true;
+    int visitCnt = 1;
+
+    while(!queue.isEmpty()){
+      int node = queue.poll();
+
+      for(int next:map.get(node)){
+        if(list.contains(next) && !visited[next]){
+          queue.add(next);
+          visited[next] = true;
+          visitCnt++;
+        }
+      }
+    }
+
+    return list.size() == visitCnt;
+  }
+
+  static int getPopulation(List<Integer> list){
+    int sum = 0;
+    for(int n:list){
+      sum+=populations[n];
+    }
+    return sum;
+  }
+
+  public static void main(String[] args) throws IOException {
+    BufferedReader br = new BufferedReader(new InputStreamReader((System.in)));
+    StringTokenizer st;
+    
+    N = Integer.parseInt(br.readLine());
+    populations = new int[N+1];
+    map = new HashMap<>();
+
+    st = new StringTokenizer(br.readLine());
+    for(int i=1; i<=N; i++){
+      populations[i] = Integer.parseInt(st.nextToken());
+      map.put(i, new HashSet<>());
+    }
+
+    for(int key=1; key<=N; key++){
+      st = new StringTokenizer(br.readLine());
+      int size = Integer.parseInt(st.nextToken());
+      for(int i=0; i<size; i++){
+        int value = Integer.parseInt(st.nextToken());
+        map.get(key).add(value);
+        map.get(value).add(key);
+      }
+    }
+
+    for(int i=1; i<=N/2; i++){
+      List<Integer> listA = new LinkedList<>();
+      combination(1, N, i, listA);
+    }
+
+    System.out.println(min==Integer.MAX_VALUE?-1:min);
+  }
 }
