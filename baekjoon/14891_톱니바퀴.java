@@ -1,4 +1,3 @@
-// TODO: debug with https://www.acmicpc.net/board/view/112067
 import java.io.*;
 import java.util.*;
 
@@ -43,6 +42,7 @@ class Gear {
     return isSs[c12];
   }
 }
+
 class Main {
   static Gear[] gears;
   
@@ -54,7 +54,7 @@ class Main {
     if(fromLeft && gears[from].isRightS() != gears[next].isLeftS()){
       dirs[next] = nextDir;
       cascadeRotate(next, nextDir, fromLeft, dirs);
-    } else if(gears[next].isRightS() != gears[from].isLeftS()){
+    } else if(!fromLeft && gears[next].isRightS() != gears[from].isLeftS()){
       dirs[next] = nextDir;
       cascadeRotate(next, nextDir, fromLeft, dirs);
     }
@@ -84,11 +84,9 @@ class Main {
       rotateDirs[gearNum] = dir;
       cascadeRotate(gearNum, dir, true, rotateDirs);
       cascadeRotate(gearNum, dir, false, rotateDirs);
-      System.out.printf("Try:%d\n", k);
-      System.out.println(Arrays.toString(rotateDirs));
 
       for(int i=0; i<4; i++){
-        if(i!=0){
+        if(rotateDirs[i]!=0){
           gears[i].rotate(rotateDirs[i]);
         }
       }
