@@ -1,14 +1,16 @@
-// WIP
 import java.util.*;
 import java.io.*;
 
 public class Solution {
 	static int find(int[] ps, int x) {
-		if(ps[x]==x) return ps[x];
-		return find(ps, ps[x]);
+		if (x!=ps[x]) {
+			ps[x] = find(ps, ps[x]);
+		}
+		return ps[x];
 	}
+	
 	static void union(int[] ps, int x, int y) {
-		ps[find(ps, ps[y])] = find(ps, ps[x]);
+		ps[y] = x;
 	}
 	
 	public static void main(String[] args) throws IOException {
@@ -35,16 +37,21 @@ public class Solution {
 				int type = Integer.parseInt(st.nextToken());
 				int A = Integer.parseInt(st.nextToken());
 				int B = Integer.parseInt(st.nextToken());
+
+				int pA = find(ps, A);
+				int pB = find(ps, B);
 				
 				if(type==0) {
-					union(ps, A, B);
+					if(pA!=pB) {
+						union(ps, pA, pB);
+					}
 				} else if (type==1) {
-					int result = ps[A]==ps[B] ? 1 : 0;
+					int result = ps[pA]==ps[pB] ? 1 : 0;
 					sb.append(result);
 				}
 			}
 			
-			System.out.printf("#%d %s", t, sb.toString());
+			System.out.printf("#%d %s\n", t, sb.toString());
 		}
 		
 	}
