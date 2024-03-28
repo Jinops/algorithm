@@ -1,3 +1,4 @@
+// 크루스칼 풀이
 import java.util.*;
 import java.io.*;
 
