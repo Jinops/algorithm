@@ -1,4 +1,3 @@
-// WIP
 import java.util.*;
 import java.io.*;
 
@@ -7,35 +6,37 @@ public class Main {
   static int X;
   static int[][] mtx;
 
-  final static int[][] deltasCW = {{0,1},{1,0},{0,-1},{-1,0}};
-  final static int[][] deltasCCW = {{0,1},{-1,0},{0,-1},{1,0}};
+  final static int[][] deltasCW = {{-1,0},{0,1},{1,0},{0,-1}};
+  final static int[][] deltasCCW = {{1,0},{0,1},{-1,0},{0,-1}};
 
   static boolean inRange(int y, int x){
     return 0<=x&&x<X && 0<=y&&y<Y;
   }
 
-  static void push(int[] wind, int[][] d){
-    int y = wind[0];
-    int x = wind[1];
-    int i = wind[2];
-
-    int ny = y + d[i][0];
-    int nx = x + d[i][1];
-
-    if(!inRange(ny, nx)){
-      i += 1;
-      ny = y + d[i][0];
-      nx = x + d[i][1];
+  static void clean(int cleanerY, int[][] d){
+    // d: 바람 방향의 역방향을 전달. 청정기쪽으로 빨아드린다
+    int i = 0;
+    int y = cleanerY + d[i][0];
+    int x = 0 + d[i][1];
+    mtx[y][x] = 0; // 청정기 바로 위(아래) 지점은 0
+    
+    while(!(y==cleanerY && x==1)) { // 청정기 오른쪽 지점에서 break
+      int by = y + d[i][0];
+      int bx = x + d[i][1];
+      
+      if(!inRange(by, bx) || (y==cleanerY && x==X-1)) {
+        // 배열 벗어나거나, 이전 위치가 돌아가야하는(꺾이는) 위치라면
+        i = (i<3) ? i+1 : 0;
+        by = y + d[i][0];
+        bx = x + d[i][1];
+      }
+      
+      mtx[y][x] = mtx[by][bx];
+      y = by;
+      x = bx;
     }
-
-    if(mtx[ny][nx]!=-1){
-      mtx[ny][nx] += mtx[y][x]; // 밀어내기
-      i = 0;
-    }
-    mtx[y][x] = 0;
-    wind[0] = ny;
-    wind[1] = nx;
-    wind[2] = i;
+    
+    mtx[y][x] = 0; //청정기 바로 오른쪽 지점은 0
   }
 
   static void spread(int y, int x, int[][] overlay){
@@ -47,7 +48,7 @@ public class Main {
       int ny = y+d[0];
       int nx = x+d[1];
       if(inRange(ny, nx) && mtx[ny][nx]!=-1){
-        overlay[ny][nx] -= power;
+        overlay[ny][nx] += power;
         cnt += 1;
       }
     }
@@ -61,7 +62,7 @@ public class Main {
     X = Integer.parseInt(st.nextToken());
     int T = Integer.parseInt(st.nextToken());
 
-    int cleaner = -1; // 아래의 y값 저장
+    int cleanerY = -1; // 아래의 y값 저장
 
     mtx = new int[Y][X];
     for(int i=0; i<Y; i++){
@@ -69,14 +70,10 @@ public class Main {
       for(int j=0; j<X; j++){
         mtx[i][j] = Integer.parseInt(st.nextToken());
         if(mtx[i][j]==-1){
-          cleaner = i;
+          cleanerY = i;
         }
       }
     }
-
-    int[] windCCW = new int[]{cleaner-1, 0, 0};
-    int[] windCW = new int[]{cleaner, 0, 0};
-    // y, x, 방향(delta)
 
     int t = 0;
     while(t++<T){
@@ -96,8 +93,8 @@ public class Main {
         }
       }
       // 공기청정기
-      push(windCCW, deltasCCW);
-      push(windCW, deltasCW);
+      clean(cleanerY-1, deltasCW);
+      clean(cleanerY, deltasCCW);
     }
 
     int result = 2; // 공기청정기 제외
