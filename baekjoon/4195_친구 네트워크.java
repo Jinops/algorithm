@@ -1,4 +1,3 @@
-// TODO: 5% 시간초과
 import java.io.*;
 import java.util.*;
 
@@ -18,7 +17,8 @@ class Main {
     
     int T = Integer.parseInt(br.readLine());
     for(int t=0; t<T; t++) {
-      HashMap<String, Integer> map = new HashMap<>();
+      HashMap<String, Integer> name = new HashMap<>();
+      HashMap<Integer, Integer> cnt = new HashMap<>();
       ps = new ArrayList<>();
       int idx = 0;
       
@@ -28,34 +28,29 @@ class Main {
         String A = st.nextToken();
         String B = st.nextToken();
         
-        if(!map.containsKey(A)) {
-          map.put(A, idx);
+        if(!name.containsKey(A)) {
+          name.put(A, idx);
+          cnt.put(idx, 1);
           ps.add(idx);
           idx += 1;
         }
-        if(!map.containsKey(B)) {
-          map.put(B, idx);
+        if(!name.containsKey(B)) {
+          name.put(B, idx);
+          cnt.put(idx, 1);
           ps.add(idx);
           idx += 1;
         }
         
-        int pA = find(map.get(A));
-        int pB = find(map.get(B));
+        int pA = find(name.get(A));
+        int pB = find(name.get(B));
         
         if(pA!=pB) {
           // union
           ps.set(pB, pA);
+          cnt.put(pA, cnt.get(pA)+cnt.get(pB));
         }
         
-        // update parents
-        int result = 0;
-        for(int i=0; i<idx; i++) {
-          int p = find(i);
-          if(p==pA) {
-            result += 1;
-          }
-        }
-        sb.append(result).append('\n');
+        sb.append(cnt.get(pA)).append('\n');
       }
     }
     
