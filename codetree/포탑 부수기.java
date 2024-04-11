@@ -6,7 +6,7 @@ import java.io.*;
 // 종료조건: 남은 포탑 1개
 // 공격자: 가장 약한 포탑
 // - 공격력 낮은 - 가장 최근 공격 - 행+열 가장 큰 - 열 가장 큰 
-// 공격력 N+M 증가 (N+1 + M+1)
+// 공격력 N+M 증가
 
 // 가장 강한 포탑을 공격
 // - 공격력 높은 - 가장 오래된 - 행+열 가장 작은 - 열 가장 작은
@@ -76,8 +76,8 @@ public class Main {
   static int[][] mtx;
   
   final static int[][] ds = {{0,1},{1,0},{0,-1},{-1,0}};
-  final static int[][] bombDs = {{0,1},{1,0},{0,-1},{-1,0},{1,1},{-1,1},{-1,-1},{1,-1}};
   // (y,x) 우,하,좌,상 우선순위
+  final static int[][] bombDs = {{0,1},{1,0},{0,-1},{-1,0},{1,1},{-1,1},{-1,-1},{1,-1}};
  
   static Point getNewPoint(Point p, int[] d) {
     int y = p.y+d[0];
@@ -93,10 +93,12 @@ public class Main {
   }
   
   static List<Point> bombAttack(Tower from, Tower to) {
-    Point p = new Point(from.y, from.x, null);
     mtx[to.y][to.x] -= from.att; 
     
     List<Point> targets = new ArrayList<>();
+    Point p = new Point(to.y, to.x, null);
+    
+    targets.add(p);
     
     for(int[] d:bombDs) {
       Point np = getNewPoint(p, d);
@@ -107,13 +109,15 @@ public class Main {
     return targets;
   }
   
-  static List<Point> laserAttack(Tower from, Point target) {
-    mtx[target.y][target.x] -=from.att;
+  static List<Point> laserAttack(Tower from, Point to) {
+    mtx[to.y][to.x] -=from.att;
 
     List<Point> targets = new ArrayList<>();
-    Point p = target.parent;
+    Point p = to.parent;
     
-    while(!(p.y==from.y && p.x==from.x)) {
+    targets.add(to);
+    
+    while(p!=null) {
       targets.add(p);
       mtx[p.y][p.x]-= from.att/2;
       p = p.parent;
@@ -122,7 +126,7 @@ public class Main {
     return targets;
   }
   
-  static List<Point> tryLaserAttack(Tower from, Tower target) {
+  static List<Point> tryLaserAttack(Tower from, Tower to) {
     Queue<Point> queue = new LinkedList<>();
     boolean[][] visited = new boolean[N][M];
     
@@ -132,7 +136,7 @@ public class Main {
     while(!queue.isEmpty()) {
       Point p = queue.poll();
       
-      if(p.y==target.y && p.x==target.x) {
+      if(p.y==to.y && p.x==to.x) {
         return laserAttack(from, p);
       }
       
@@ -151,18 +155,18 @@ public class Main {
   static void updateAtt(Tower from, int k) {
     from.att += (N+M);
     from.lastK = k;
-    mtx[from.y][from.x]= from.att;
   }
   
-  static void updateMtx(Tower from, Tower target, List<Point> targets) {
+  static void updateMtx(Tower from, List<Point> targets) {
     boolean[][] updated = new boolean[N][M];
     
     updated[from.y][from.x] = true; 
-    updated[target.y][target.x] = true;
     
     for(Point p:targets) {
       updated[p.y][p.x] = true; 
     }
+    
+    mtx[from.y][from.x] = from.att; 
     
     for(int i=0; i<N; i++) {
       for(int j=0; j<M; j++) {
@@ -184,10 +188,16 @@ public class Main {
     return towers;
   }
   
-  static void print() {
+  static void print(Tower from, Tower to) {
     for(int i=0; i<N; i++) {
-      for(int j=0; j<N; j++) {
-        System.out.printf("%3d ", mtx[i][j]);
+      for(int j=0; j<M; j++) {
+        if(i==from.y&&j==from.x) {
+          System.out.printf("[%4d] ", mtx[i][j]);
+        }
+        else if(i==to.y&&j==to.x) {
+          System.out.printf("<%4d> ", mtx[i][j]);
+        }
+        else System.out.printf("%6d ", mtx[i][j]);
       }
       System.out.println();
     }
@@ -208,7 +218,7 @@ public class Main {
     
     for(int i=0; i<N; i++) {
       st = new StringTokenizer(br.readLine());
-      for(int j=0; j<N; j++) {
+      for(int j=0; j<M; j++) {
         mtx[i][j] = Integer.parseInt(st.nextToken());
         if(mtx[i][j]>0) {
           towers.add(new Tower(i, j, mtx[i][j], 0));
@@ -220,16 +230,17 @@ public class Main {
     int k = 0; // 턴
     while(towers.size()>1 && k++<K) {
       Tower from = towers.get(0);
-      Tower target = towers.get(towers.size()-1);
+      Tower to = towers.get(towers.size()-1);
       
       updateAtt(from, k);
       
-      List<Point> targets = tryLaserAttack(from, target);
+      List<Point> targets = tryLaserAttack(from, to);
+      // include 'to'
       if(targets.size()==0) { // 레이저 공격 실패
-        targets = bombAttack(from, target);
+        targets = bombAttack(from, to);
       }
       
-      updateMtx(from, target, targets);
+      updateMtx(from, targets);
       towers = getTowers(towers);
       Collections.sort(towers);
     }
@@ -238,3 +249,9 @@ public class Main {
     else System.out.println(towers.get(towers.size()-1).att);
   }
 }
+/*
+디버깅 시간 1시간
+- mtx를 업데이트 시, 주변(경로) 공격 외 나머지 지점을 처리할 때 최종 공격지점이 포함되어 있었음
+- 따라서 targets에 최종 공격지점을 포함하도록 함
+- 그 외 배열 크기 지정 시 오타(N<->M) 등
+*/
