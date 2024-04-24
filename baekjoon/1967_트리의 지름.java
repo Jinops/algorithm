@@ -62,8 +62,15 @@ public class Main {
     }
     
     Node data = new Node(1, 0);
+    boolean[] visited = new boolean[N+1];
+    visited[data.n] = true;
+    
     DFS(data.n, new boolean[N+1], 0, data, 0);
+    
     data.dist = 0;
+    visited = new boolean[N+1];
+    visited[data.n] = true;
+    
     DFS(data.n, new boolean[N+1], 0, data, data.n);
     
     System.out.println(data.dist);

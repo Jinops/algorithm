@@ -1,5 +1,3 @@
-// TODO: 47% 시간초과
-
 import java.util.*;
 import java.io.*;
 
@@ -58,13 +56,14 @@ public class Main {
     
     Node data = new Node(1, 0); // 임의의 노드
     boolean visited[] = new boolean[V+1];
-    
     visited[1] = true;
+    
     DFS(data.n, visited, 0, data, 0);
     
     data.dist = 0;
-    
+    visited = new boolean[V+1];
     visited[data.n]= true; 
+    
     DFS(data.n, new boolean[V+1], 0, data, data.n);
     
     System.out.println(data.dist);
