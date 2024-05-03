@@ -1,6 +1,6 @@
-// TODO: 시간초과
-// 누적합을 구하고 
-// M의 수만큼 탐색을 실시
+// 블루레이의 크기에 대해 이분탐색 시행
+// 해당 크기에 모든 블루레이를 넣었을  때 만들어지는 개수가
+// M과 일치하면 종료
 
 import java.util.*;
 import java.io.*;
@@ -9,25 +9,37 @@ public class Main {
   static int N;
   static int M;
   static int[] nums;
-  
-  static int result = Integer.MAX_VALUE;
-  
-  static void find(int i, Stack<Integer> stack) {
-    if(stack.size()==M-1) {
-      int max = Math.max(nums[stack.get(0)], nums[N-1] - nums[stack.get(M-2)]);
-      for(int j=1; j<M-1; j++) {
-        max = Math.max(max, nums[stack.get(j)] - nums[stack.get(j-1)]);
-      }
+
+  static int find(int start, int end) {
+    while(start < end) {
+      int mid = (start+end) / 2; // 블루레이의 크기
+      int cnt = getCount(mid);// mid 크기의 블루레이를 사용한 결과
       
-      result = Math.min(result, max);
-      return;
+      if(cnt > M) {
+        // 목표 M보다 개수가 많아졌다면
+        start = mid + 1; // 크기를 키워간다.
+      } else {
+        // 목표와 일치하거나 더 다면
+        end = mid; // 크기를 줄여간다
+      }
+    }
+    return start;
+  }
+  
+  static int getCount(int size) {
+    int cnt = 0; // 사용한 블루레이 개수
+    int cur = 0; // 현재 블루레이의 남은 공간
+    
+    for(int num:nums) {
+      if(num>cur) {
+        // 현재 블루레이에 num을 넣을 수 없다면 블루레이 새로 할당
+        cnt++;
+        cur = size;
+      }
+      cur -= num;
     }
     
-    for(int idx=i; idx<N-1; idx++) {
-      stack.add(idx);
-      find(idx+1, stack);
-      stack.pop();
-    }
+    return cnt;
   }
   
   public static void main(String[] args) throws IOException {
@@ -41,12 +53,14 @@ public class Main {
     
     st = new StringTokenizer(br.readLine());
     
-    nums[0] = Integer.parseInt(st.nextToken());
-    for(int i=1; i<N; i++) {
-      nums[i] = Integer.parseInt(st.nextToken()) + nums[i-1];
+    int max = 0;
+    int sum = 0;
+    for(int i=0; i<N; i++) {
+      nums[i] = Integer.parseInt(st.nextToken());
+      max = Math.max(max, nums[i]);
+      sum += nums[i];
     }
     
-    find(0, new Stack<>());
-    System.out.println(result);
+    System.out.println(find(max, sum));
   }
 }
